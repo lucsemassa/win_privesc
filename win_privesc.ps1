@@ -122,7 +122,7 @@ function Get-OthersProcessStatistics
 $groups | ForEach-Object {
   $groupeName=$_;
   
-  (Get-Acl $path_to_check).access | ForEach-Object{
+  (Get-Acl $path_to_check -ErrorAction SilentlyContinue).access | ForEach-Object{
 
     if ( $_ | ft | Out-String | Select-String -Pattern "Allow" | Select-String -Pattern $groupeName.replace("\","\\") | Select-String "(FullControl)|(Modify)|(Write)") {$value_to_return=$true; } 
 }
@@ -201,7 +201,7 @@ function CheckInsecureUserPermission{
 function GetNetworkInfo{
   print_output("Network addresses")
   try {
-    Get-NetIPConfiguration | ft InterfaceAlias,InterfaceDescription,IPv4Address
+    Get-NetIPConfiguration -ErrorAction SilentlyContinue | ft InterfaceAlias,InterfaceDescription,IPv4Address
     }catch {
       ipconfig
   }
@@ -220,10 +220,11 @@ function GetNetworkInfo{
 function LootingForInterrestingFile{
     
   print_output("Looting for passwords in C Directory")
+
     
-  Get-ChildItem -Path C:\ | Where-Object{$_.Name -ne "Windows" -and  $_.Name -ne "Program Files" -and $_.Name -ne "Program Files (x86)"} | ForEach-Object{ Get-ChildItem -Path $_.FullName -Recurse -File  -Include '*.txt','*.py','*.php','*.ps1','*.bat','*.config','*.aspx','*.asp','*.csv','*.hta','*.vbs','*.vba','*.java' -ErrorAction SilentlyContinue  | Select-String -Pattern 'user', 'login', 'pass', 'pwd', 'psw', 'database', 'secret', 'password', 'vnc'  -AllMatches -ErrorAction SilentlyContinue | Select-Object -Unique Path }
-  Get-ChildItem -Path "C:\Program Files" | Where-Object{$_.Name -ne "Common Files" -and  $_.Name -ne "internet explorer" -and $_.Name -NotLike "Microsoft*" -and $_.Name -ne "VMware" -and $_.Name -NotLike "Windows*"} | ForEach-Object{ Get-ChildItem -Path $_.FullName -Recurse -File  -Include '*.txt','*.py','*.php','*.ps1','*.bat','*.config','*.aspx','*.asp','*.csv','*.hta','*.vbs','*.vba','*.java' -ErrorAction SilentlyContinue  | Select-String -Pattern 'user', 'login', 'pass', 'pwd', 'psw', 'database', 'secret', 'password', 'vnc'  -AllMatches -ErrorAction SilentlyContinue | Select-Object -Unique Path }
-  Get-ChildItem -Path "C:\Program Files (x86)" | Where-Object{$_.Name -ne "Common Files" -and  $_.Name -ne "internet explorer" -and $_.Name -NotLike "Microsoft*" -and $_.Name -ne "VMware" -and $_.Name -NotLike "Windows*"} | ForEach-Object{ Get-ChildItem -Path $_.FullName -Recurse -File  -Include '*.txt','*.py','*.php','*.ps1','*.bat','*.config','*.aspx','*.asp','*.csv','*.hta','*.vbs','*.vba','*.java' -ErrorAction SilentlyContinue  | Select-String -Pattern 'user', 'login', 'pass', 'pwd', 'psw', 'database', 'secret', 'password', 'vnc'  -AllMatches -ErrorAction SilentlyContinue | Select-Object -Unique Path }
+  Get-ChildItem -Path C:\ | Where-Object{$_.Name -ne "Windows" -and  $_.Name -ne "Program Files" -and $_.Name -ne "Program Files (x86)"} | ForEach-Object{ Get-ChildItem -Path $_.FullName -Recurse -File  -Include '*.txt','*.py','*.php','*.ps1','*.bat','*.bak','*.config','*.aspx','*.asp','*.csv','*.hta','*.vbs','*.vba','*.java' -ErrorAction SilentlyContinue  | Select-String -Pattern 'user', 'login', 'pass', 'pwd', 'psw', 'database', 'secret', 'password', 'vnc'  -AllMatches -ErrorAction SilentlyContinue | Select-Object -Unique Path }
+  Get-ChildItem -Path "C:\Program Files" | Where-Object{$_.Name -ne "Common Files" -and  $_.Name -ne "internet explorer" -and $_.Name -NotLike "Microsoft*" -and $_.Name -ne "VMware" -and $_.Name -NotLike "Windows*"} | ForEach-Object{ Get-ChildItem -Path $_.FullName -Recurse -File  -Include '*.txt','*.py','*.php','*.ps1','*.bat','*.config','*.bak','*.aspx','*.asp','*.csv','*.hta','*.vbs','*.vba','*.java' -ErrorAction SilentlyContinue  | Select-String -Pattern 'user', 'login', 'pass', 'pwd', 'psw', 'database', 'secret', 'password', 'vnc'  -AllMatches -ErrorAction SilentlyContinue | Select-Object -Unique Path }
+  Get-ChildItem -Path "C:\Program Files (x86)" | Where-Object{$_.Name -ne "Common Files" -and  $_.Name -ne "internet explorer" -and $_.Name -NotLike "Microsoft*" -and $_.Name -ne "VMware" -and $_.Name -NotLike "Windows*"} | ForEach-Object{ Get-ChildItem -Path $_.FullName -Recurse -File  -Include '*.txt','*.py','*.php','*.ps1','*.bat','*.config','*.bak','*.aspx','*.asp','*.csv','*.hta','*.vbs','*.vba','*.java' -ErrorAction SilentlyContinue  | Select-String -Pattern 'user', 'login', 'pass', 'pwd', 'psw', 'database', 'secret', 'password', 'vnc'  -AllMatches -ErrorAction SilentlyContinue | Select-Object -Unique Path }
 
    
 
@@ -355,7 +356,7 @@ function GetInsecuredPermissionInRegistry{
     Get-ItemProperty -Path "HKCU:SOFTWARE\Policies\Microsoft\Windows\Installer" -Name AlwaysInstallElevated -ErrorAction SilentlyContinue
 
     print_output("Checking editabled item in HKLM:\SYSTEM\CurrentControlset")
-    get-childitem HKLM:\SYSTEM\CurrentControlset | Select PSChildName | foreach-Object {
+    get-childitem HKLM:\SYSTEM\CurrentControlset -ErrorAction SilentlyContinue | Select PSChildName | foreach-Object {
      $current_path=Write-Output ("HKLM:\SYSTEM\CurrentControlset\"+$_.PSChildName);
      if (IsWritable($current_path)) { Write-Output $current_path}
  }
@@ -536,7 +537,7 @@ function GetAlternateDataStream{
   GetInsecureServices
   
   GetExcutableFileInCProgram
-  GetWSLINfo
+  #GetWSLINfo
   GetWSUS
   GetInsecuredPermissionInRegistry
   CheckPathDLLHijack
