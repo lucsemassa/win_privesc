@@ -418,7 +418,7 @@ function GetUnusualCDirectory{
 
 function GetExcutableFileInCProgram{
    print_output("Checking editabled item in C:\Program ")
-   get-childitem C:\Program* -recurse | where {$_.extension -eq ".exe" -or $_.extension -eq ".ps1" -or $_.extension -eq ".bat"} | Select-Object -Property FullName | foreach-Object {
+   get-childitem C:\Program* -ErrorAction SilentlyContinue -recurse | where {$_.extension -eq ".exe" -or $_.extension -eq ".ps1" -or $_.extension -eq ".bat"} | Select-Object -Property FullName | foreach-Object {
        #Write-Output ($_.FullName);
        $current_path = $_.FullName
        #Write-Output "Checking if $current_path is writable"
